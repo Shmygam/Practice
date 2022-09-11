@@ -1,0 +1,187 @@
+#include <iostream>
+#include <math.h>
+#include <stdlib.h>
+#include <windows.h>
+#include <conio.h>
+#include <fstream>
+
+double** InitializationMatrix(int Equations, int Variables, double** matrix_);
+void OutputMatrix(int Equations, int Variables, double** matrix_);
+double* GaussMethod(int Equations, int Variables, double** matrix_);
+bool CheckInput(int Verifiable);
+bool CheckInputFloat(double Verifiable);
+bool DirectInput();
+bool InputFromFile();
+
+int main() {
+    setlocale(LC_ALL, "ru");
+    bool Question = true;
+    while (Question) {
+        system("cls");
+        char Method; std::cout << "Введите метод ввода матрицы коэффциентов\n\n1. Ввод матрицы через программу.\n2. Ввод матрицы через файл\n"; Method = _getch(); std::cout << '\n';
+        switch (Method)
+        {
+            case '1': DirectInput(); break;
+            case '2': InputFromFile(); break;
+            default: std::cout << "Введено неверное значение."; Sleep(1000); continue;
+        }
+
+        char Temp; std::cout << "\n\nВведите y (н на русском), если хотите решить еще одну систему уравнений или n (т на русском), если хотите завершить программу>"; Temp = _getch(); std::cout << '\n';
+        switch (Temp) {
+            case 'y': Question = true; break;
+            case 'н': Question = true; break;
+            case 'n': Question = false; break;
+            case 'т': Question = false; break;
+            default: std::cout << "Введено неверное значение. Завершение программы."; Sleep(2500); Question = false; break;
+        }
+    }
+    return 0;
+}
+
+bool DirectInput() {
+    system("cls");
+    int NumberOfEquations; do { std::cout << "Введите кол-во уравнений: "; std::cin >> NumberOfEquations; } while (CheckInput(NumberOfEquations));
+    int NumberOfVariables; do { std::cout << "Введите кол-во переменных: "; std::cin >> NumberOfVariables; } while (CheckInput(NumberOfVariables)); NumberOfVariables += 1;
+
+    double** matrix = new double* [NumberOfEquations];
+    for (int i = 0; i < NumberOfEquations; i++) {
+        matrix[i] = new double[NumberOfVariables];
+    }
+    OutputMatrix(NumberOfEquations, NumberOfVariables, InitializationMatrix(NumberOfEquations, NumberOfVariables, matrix));
+    for (int i = 0; i < NumberOfEquations; i++) {
+        std::cout << GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i] << " ";
+    }
+
+    delete matrix;
+    return 0;
+}
+
+bool InputFromFile() {
+    stop2:
+    system("cls");
+    int NumberOfEquations, NumberOfVariables;
+    bool Failure = false;
+    std::string Path;
+
+    std::cout << "Учтите, что первое число должно быть количествои уравнений, а второе - количеством переменных. После, можно вводить матрицу коэф-ов.";
+    std::cout << "\nВведите путь файла: "; std::cin >> Path;
+
+    std::ifstream file(Path);
+    if (!file) {
+        std::cout << "Такого файла нет.\n";
+        return 1;
+    }
+    std::cout << "\n";
+    file >> NumberOfEquations; file >> NumberOfVariables; NumberOfVariables += 1;
+    double** matrix = new double* [NumberOfEquations];
+    for (int i = 0; i < NumberOfEquations; i++) {
+        matrix[i] = new double[NumberOfVariables];
+    }
+    for (int i = 0; i < NumberOfEquations; i++) {
+        for (int j = 0; j < NumberOfVariables; j++) {
+            file >> matrix[i][j];
+            if ((float)matrix[i][j] != matrix[i][j]) {
+                Failure = true;
+            }
+        }
+    }
+
+    if (Failure) {
+        std::cout << "Введен неверный элемент в файле. Попробуйте заново.";
+        Sleep(2000);
+        goto stop2;
+    }
+
+    OutputMatrix(NumberOfEquations, NumberOfVariables, matrix);
+    for (int i = 0; i < NumberOfEquations; i++) {
+        std::cout << GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i] << " ";
+    }
+
+    delete matrix;
+    file.close();
+    return 0;
+}
+
+bool CheckInput(int Verifiable) {
+    if (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore();
+        std::cout << "Вы ввели неверное значение. Попробуйте снова.\n";
+        return 1;
+    } else if (Verifiable <= 0) {
+        std::cout << "Вы ввели значение меньше, или равное нулю. Попробуйте снова.\n";
+        return 1;
+    }
+    return 0;
+}
+
+bool CheckInputFloat(double Verifiable) {
+    if (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore();
+        return 1;
+    }
+
+    return 0;
+}
+
+double** InitializationMatrix(int Equations, int Variables, double** matrix_) {
+    stop:
+    bool Failure = false;
+    system("cls");
+    std::cout << "Размер матрицы коэффициентов: " << Equations << " на " << Variables << "\n\n";
+    std::cout << "Введите матрицу коэффициентов:\n";
+    for (int i = 0; i < Equations; i++) {
+        for (int j = 0; j < Variables; j++){
+             std::cin >> matrix_[i][j];
+             if (CheckInputFloat(matrix_[i][j])) {
+                 Failure = true;
+             }
+        }
+    }
+    if (Failure) {
+        std::cout << "Введен неверный элемент матрицы";
+        Sleep(1000);
+        goto stop;
+    }
+    return matrix_;
+}
+
+void OutputMatrix(int Equations, int Variables, double** matrix_) {
+    std::cout << "Введенная матрица:\n";
+    for (int i = 0; i < Equations; i++) {
+        for (int j = 0; j < Variables; j++) {
+            std::cout.width(5); std::cout << matrix_[i][j] << " ";
+        }
+        std::cout << '\n';
+    }
+    std::cout << '\n';
+}
+
+double* GaussMethod(int Equations, int Variables, double** matrix_) {
+    double  temp;
+    double* TempMatrix = new double[Variables];
+
+    for (int i = 0; i < Equations; i++) {
+        temp = matrix_[i][i];
+        for (int j = Equations; j >= i; j--) {
+            matrix_[i][j] /= temp;
+        }
+
+        for (int j = i + 1; j < Equations; j++) {
+            temp = matrix_[j][i];
+            for (int k = Equations; k >= i; k--) {
+                matrix_[j][k] -= temp * matrix_[i][k];
+            }
+        }
+    }
+    TempMatrix[Equations - 1] = matrix_[Equations - 1][Equations];
+    for (int i = Equations - 2; i >= 0; i--) {
+        TempMatrix[i] = matrix_[i][Equations];
+        for (int j = i + 1; j < Equations; j++) {
+            TempMatrix[i] -= matrix_[i][j] * TempMatrix[j];
+        }
+    }
+
+    return TempMatrix;
+}
