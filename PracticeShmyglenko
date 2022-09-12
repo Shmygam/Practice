@@ -49,7 +49,7 @@ bool DirectInput() {
     }
     OutputMatrix(NumberOfEquations, NumberOfVariables, InitializationMatrix(NumberOfEquations, NumberOfVariables, matrix));
     for (int i = 0; i < NumberOfEquations; i++) {
-        std::cout << GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i] << " ";
+        std::cout << "x" << i << " = " << GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i] << "   ";
     }
 
     delete matrix;
@@ -94,7 +94,7 @@ bool InputFromFile() {
 
     OutputMatrix(NumberOfEquations, NumberOfVariables, matrix);
     for (int i = 0; i < NumberOfEquations; i++) {
-        std::cout << GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i] << " ";
+        std::cout << "x" << i << " = " << GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i] << "   ";
     }
 
     delete matrix;
@@ -148,10 +148,36 @@ double** InitializationMatrix(int Equations, int Variables, double** matrix_) {
 }
 
 void OutputMatrix(int Equations, int Variables, double** matrix_) {
-    std::cout << "Введенная матрица:\n";
+    std::cout << "Введенная система:\n";
     for (int i = 0; i < Equations; i++) {
         for (int j = 0; j < Variables; j++) {
-            std::cout.width(5); std::cout << matrix_[i][j] << " ";
+            if (j == Variables - 2) {
+                if (matrix_[i][j] < 0) {
+                    std::cout << "(" << matrix_[i][j] << ")" << " * x" << j << " = ";
+                } else if (matrix_[i][j] == 0) {
+                    std::cout << "";
+                } else {
+                    std::cout << matrix_[i][j] << " * x" << j << " = ";
+                }
+            } else if (j == Variables - 1) {
+                if (matrix_[i][j] < 0) {
+                    std::cout << matrix_[i][j];
+                }
+                else if (matrix_[i][j] == 0) {
+                    std::cout << matrix_[i][j];
+                }
+                else {
+                    std::cout << matrix_[i][j];
+                }
+            } else {
+                if (matrix_[i][j] < 0) {
+                    std::cout << "(" << matrix_[i][j] << ")" << " * x" << j << " + ";
+                } else if (matrix_[i][j] == 0) {
+                    std::cout << " ";
+                } else {
+                    std::cout << matrix_[i][j] << " * x" << j << " + ";
+                }
+            }
         }
         std::cout << '\n';
     }
