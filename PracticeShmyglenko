@@ -18,11 +18,12 @@ int main() {
     bool Question = true;
     while (Question) {
         system("cls");
-        char Method; std::cout << "Введите метод ввода матрицы коэффциентов\n\n1. Ввод матрицы через программу.\n2. Ввод матрицы через файл\n"; Method = _getch(); std::cout << '\n';
+        char Method; std::cout << "Введите метод ввода матрицы коэффциентов\n\n1. Ввод матрицы через программу.\n2. Ввод матрицы через файл\n3. Выйти\n"; Method = _getch(); std::cout << '\n';
         switch (Method)
         {
             case '1': DirectInput(); break;
             case '2': InputFromFile(); break;
+            case '3': std::cout << "Выход из программы"; Sleep(1000); return 0;
             default: std::cout << "Введено неверное значение."; Sleep(1000); continue;
         }
 
@@ -52,15 +53,15 @@ bool DirectInput() {
         std::cout << "x" << i << " = " << GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i] << "   ";
     }
 
-    delete matrix;
+    delete *matrix;
     return 0;
 }
 
+//  C:\Users\MrInkognito\source\repos\PracticFinal\PracticFinal\File.txt
 bool InputFromFile() {
     stop2:
     system("cls");
     int NumberOfEquations, NumberOfVariables;
-    bool Failure = false;
     std::string Path;
 
     std::cout << "Учтите, что первое число должно быть количествои уравнений, а второе - количеством переменных. После, можно вводить матрицу коэф-ов.";
@@ -80,16 +81,15 @@ bool InputFromFile() {
     for (int i = 0; i < NumberOfEquations; i++) {
         for (int j = 0; j < NumberOfVariables; j++) {
             file >> matrix[i][j];
-            if ((float)matrix[i][j] != matrix[i][j]) {
-                Failure = true;
-            }
         }
     }
 
-    if (Failure) {
-        std::cout << "Введен неверный элемент в файле. Попробуйте заново.";
-        Sleep(2000);
-        goto stop2;
+    for (int i = 0; i < NumberOfEquations; i++) {
+        if ((double)GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i] != GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i]) {
+            std::cout << "Введен неверный элемент в файле. Попробуйте заново.";
+            Sleep(2000);
+            goto stop2;
+        }
     }
 
     OutputMatrix(NumberOfEquations, NumberOfVariables, matrix);
@@ -97,7 +97,7 @@ bool InputFromFile() {
         std::cout << "x" << i << " = " << GaussMethod(NumberOfEquations, NumberOfVariables, matrix)[i] << "   ";
     }
 
-    delete matrix;
+    delete *matrix;
     file.close();
     return 0;
 }
